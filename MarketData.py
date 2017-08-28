@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-class signalEnv:
+class valueEnv:
     
      def __init__(self,**kwargs):
          self.date = kwargs.get("Date")

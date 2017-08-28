@@ -6,7 +6,7 @@ get_ipython().magic('reset -sf')
 from BackTestingHeader import *
 from TradeData import tradeData
 from PositionData import positionData
-from MarketData import signalEnv
+from MarketData import valueEnv
 from datetime import datetime
 from enum import Enum
 import pickle
@@ -72,7 +72,7 @@ priorityCode = toMonthCode(priority,monthCode)
 modelData = getModel(mypath,ModelFiles[0],priority,monthCode)
 mktData = getMarket(dat_spread,today,monthCode)
 #signal = getSignal(mktData,modelData)
-signal = signalEnv(Date = today, Market = getSignal(mktData,modelData), MonthCode = monthCode)
+signal = valueEnv(Date = today, Market = getSignal(mktData,modelData), MonthCode = monthCode)
 signal.getTimeStamp()
 signal.getValue('H09_F09','close')
 signal.getValue('f5_f3','close')

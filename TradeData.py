@@ -9,7 +9,7 @@ class tradeData:
     __realizedPnl = 0
     __MTM = 0
     #__dailyPnl = 0
-    __closeTime = None
+   
     __liveTrade = True    
     
     def __init__(self,**kwargs):
@@ -20,12 +20,13 @@ class tradeData:
         self.price = self.cost 
         #self.dailyMove = 0
         self.expiry = None
+        self.closeTime = None
     
     def isAlive(self):
         return self.__liveTrade
 
     def getCloseTime(self):
-        return self.__closeTime        
+        return self.closeTime        
         
     def getRealizedPnl(self):
         return self.__realizedPnl
@@ -53,7 +54,7 @@ class tradeData:
         self.updatePrice(signalEnv)
         self.__realizedPnl = self.__realizedPnl + self.__MTM
         self.__liveTrade = False
-        self.__closeTime = signalEnv.getTimeStamp()
+        self.closeTime = signalEnv.getTimeStamp()
         closedTrade = copy.deepcopy(self)
         return closedTrade    
         
