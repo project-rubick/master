@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from BackTestingHeader import expiryCalc
 import copy
-
+import numpy as np
 
 
 class tradeData:
@@ -50,32 +50,25 @@ class tradeData:
     
     # this is a full unwind of the trade, so the function return a closed trade,
     # the self should be del after wards     
-    def fullUnwind(self,signalEnv):
-        self.updatePrice(signalEnv)
-        self.__realizedPnl = self.__realizedPnl + self.__MTM
-        self.__liveTrade = False
-        self.closeTime = signalEnv.getTimeStamp()
+    def getUnwindTrade(self,valueEnv, absAmount = None):
+        if absAmount == None:
+            absAmount = self.quantity
+        else:
+            absAmount = absAmount * np.sign(self.quantity)
+        
+        time = valueEnv.getTimeStamp()
         closedTrade = copy.deepcopy(self)
+        closedTrade.cost = valueEnv.getValue(closedTrade.ticker,'close')
+        closedTrade.quantity = -1 * absAmount
+        closedTrade.tradeTime = time
         return closedTrade    
         
-    # return partial unwind trade, if the amount happen to be the full amount, do a full unwind.    
-    def PartialUnWind(self,signalEnv,amount):
-        self.updatePrice(signalEnv)
-        if amount == self.quantity:
-            closedTrade = self.fullUnwind(signalEnv)
-            return closedTrade
-        else:
-            oldTrade = copy.deepcopy(self)
-            self.quantity = self.quantity - amount
-            self.updatePrice(signalEnv) #udpate MTM after unwind
-            oldTrade.quantity = amount
-            closedTrade = oldTrade.fullUnwind(signalEnv)
-            return closedTrade
+
         
         
     def addTrade(self,newTrade):
         # check if the ticker is the same
-        if (self.ticker is newTrade.ticker):
+        if (self.ticker == newTrade.ticker):
             #self.tradeTime = newTrade.tradeTime
             #calc new cost, quantity, reliazedPnl if closed some position
             if (self.quantity*newTrade.quantity < 0 ):

@@ -68,12 +68,16 @@ class positionData:
             else:
                 self.position[trade.ticker] = trade
             
-    def updateMarket(self,marketData):
+    def updateMarket(self,valueEnv):
+        self.__MTM = 0
         for ticker in self.position:
-            self.position[ticker].updatePrice(marketData)
+            self.position[ticker].updatePrice(valueEnv)
+            pnl = self.position[ticker].getMTM()
+            self.__MTM = self.__MTM + pnl
     
         
     def getMTM(self):
+        
         return self.__MTM
         
 

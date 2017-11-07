@@ -7,6 +7,7 @@ from TradeData import tradeData
 from PositionData import positionData
 from PositionKeeper import positionTracker
 import datetime
+
 today = datetime.datetime.now()    
 t1 = tradeData(ticker='abc',quantity=-10,cost=123,tradeTime=today)
 t2 = tradeData(ticker='abc',quantity=15,cost=125,tradeTime=today)
@@ -27,4 +28,5 @@ p1.addTrades(newlist)
 
 p1.showPotision()    
 
-tracker1 = positionTracker(Portfolio = p1)    
+tracker1 = positionTracker(Portfolio = p1)
+report =  tracker1.pnlReport()    

@@ -4,8 +4,11 @@ get_ipython().magic('reset -sf')
 
 
 from BackTestingHeader import *
+from TradingScript import strategy
 from TradeData import tradeData
 from PositionData import positionData
+from PositionKeeper import positionTracker
+from RiskData import riskReport
 from MarketData import valueEnv
 from datetime import datetime
 from enum import Enum
@@ -69,6 +72,8 @@ Port = positionData(AUM=AUM1)
 today = dates[0]    
 monthCode = contractCode(today,7)
 priorityCode = toMonthCode(priority,monthCode)
+Str  = strategy(Priority = priorityCode, Config = strategyConfig)
+
 modelData = getModel(mypath,ModelFiles[0],priority,monthCode)
 mktData = getMarket(dat_spread,today,monthCode)
 #signal = getSignal(mktData,modelData)
@@ -76,6 +81,74 @@ signal = valueEnv(Date = today, Market = getSignal(mktData,modelData), MonthCode
 signal.getTimeStamp()
 signal.getValue('H09_F09','close')
 signal.getValue('f5_f3','close')
+risk = riskReport(Portfolio = Port, ValuationEnv = signal, SingleRiskLimit = 0.3, CapitalRiskRatio = 1)
+risk.getRiskBuffer()
+risk.getTotalRisk()
+risk.getRiskReport()
+
+newTrades = Str.scanNewSignal(Port,signal,risk)
+newTrades[0].showTrade()
+Port.addTrades(newTrades)
+Port.showPotision()
+risk.updateRisk()
+risk.getRiskBuffer()
+risk.getRiskReport()
+
+exitTrades = Str.scanExit(Port,signal)
+
+###09/23 test done for new trade scan, check the check next day.
+Port.updateMarket(signal)
+Port.getMTM()
+# EOD day1 MTM 0, 5 live position
+
+# day2
+# 1. prepare data
+day2 = dates[1]    
+monthCode2 = contractCode(day2,7)
+priorityCode2 = toMonthCode(priority,monthCode2)
+Str2  = strategy(Priority = priorityCode2, Config = strategyConfig)
+modelData2 = getModel(mypath,ModelFiles[1],priority,monthCode2)
+mktData2 = getMarket(dat_spread,day2,monthCode2)
+signal2 = valueEnv(Date = day2, Market = getSignal(mktData2,modelData2), MonthCode = monthCode2)
+risk2 = riskReport(Portfolio = Port, ValuationEnv = signal2, SingleRiskLimit = 0.3, CapitalRiskRatio = 1)
+
+# 2. update risk
+risk2.getRiskBuffer()
+risk2.getTotalRisk()
+risk2.getRiskReport()
+
+# 3. scan exit trade
+exitTrades = Str2.scanExit(Port,signal2)
+Port.addTrades(exitTrades)
+
+# 4. reduce risk 
+reduceRiskTrades = Str2.reduceRiskExposure(Port,signal2,risk2)
+reduceRiskTrades[0].showTrade()
+Port.showPotision()
+Port.updateMarket(signal2)
+Port.getMTM()
+Port.addTrades(reduceRiskTrades)
+Port.showPotision()
+
+# 5. scan new trade
+risk2.updateRisk()
+risk2.getRiskReport()
+risk2.getRiskBuffer()
+
+newTrades = Str2.scanNewSignal(Port,signal2,risk2)
+Port.addTrades(newTrades)
+
+# 6. EOD, realized pnl, risk, reporting
+keeper = positionTracker(Portfolio = Port)
+keeper.pnlReport()
+
+#day2 looks good, next step is put into for loop and write a daily report pnl, new trade, risk, etc... (positionTracker).
+
+signal.getValue('G09_Z08','signal')
+risk.getTradeRisk('G09_Z08')
+
+
+
 
 testPort2 = positionData(AUM=AUM1)
 testPort2.getRiskReport(modelData)

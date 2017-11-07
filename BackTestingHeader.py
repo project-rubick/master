@@ -9,7 +9,7 @@ Created on Sat Jun  3 11:20:31 2017
 
 import calendar
 from datetime import timedelta
-
+import numpy as np
 
 import pandas as pd    
 from enum import Enum
@@ -136,6 +136,8 @@ def contractCode(d,n):
     
     return code
 
+
+# is this used? TODO: check this, remove if not.
 def tradeFilter(tradeList, priority, monthCodeMap):
     priority_code = list()
 
@@ -156,10 +158,18 @@ def tradeFilter(tradeList, priority, monthCodeMap):
     return tradeList
 
 
+def tradesFilter(tradeList,ticker):
+    output = list()
+    outputDf = pd.DataFrame()
+    for trade in tradeList:
+        if ticker == trade.ticker:
+           output.append([trade.tradeTime, trade.quantity, trade.cost])
+           
+    outputDf = pd.DataFrame(output, columns = ['date','quantity','price'])
 
+           
 
-
-    
+    return outputDf
 
 
 

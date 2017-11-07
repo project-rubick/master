@@ -21,7 +21,13 @@ class valueEnv:
      def getTimeStamp(self):
          return self.date
          
+     def getReverseTicker(self):
+         reverseMap = dict()
+         for ticker in self.tickerMap:
+             code = self.tickerMap[ticker]
+             reverseMap[code] = ticker
+            
+         return reverseMap
          
-
 #if __name__ == "__main__":
     
